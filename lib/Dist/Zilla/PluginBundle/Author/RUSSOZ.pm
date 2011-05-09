@@ -70,7 +70,8 @@ sub configure {
                 url_shortener => 'TinyURL',
             }
         ]
-    ) if ( $self->twitter and not $self->fake_release );
+    ) if ( $self->twitter );
+	return;
 }
 
 __PACKAGE__->meta->make_immutable;
