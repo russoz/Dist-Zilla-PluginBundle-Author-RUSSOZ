@@ -28,10 +28,11 @@ has twitter_tags => (
     isa     => 'Str',
     lazy    => 1,
     default => sub {
-        my $default = q{#cpan #perl};
-        return $default . defined $_[0]->payload->{twitter_tags}
-          ? q{ } . $_[0]->payload->{twitter_tags}
-          : '';
+        my @t =
+          defined( $_[0]->payload->{twitter_tags} )
+          ? ( $_[0]->payload->{twitter_tags} )
+          : ();
+        return join( ' ', q{#cpan}, q{#perl}, @t );
     },
 );
 
@@ -59,7 +60,8 @@ sub configure {
         'ReportVersions::Tiny',
     );
 
-    $self->add_bundle('TestingMania');
+    $self->add_bundle(
+        'TestingMania' => { disable => q{Test::CPAN::Changes} } );
 
     $self->add_plugins(
         [
@@ -71,7 +73,7 @@ sub configure {
             }
         ]
     ) if ( $self->twitter );
-	return;
+    return;
 }
 
 __PACKAGE__->meta->make_immutable;
@@ -105,7 +107,6 @@ a L<Dist::Zilla> configuration approximately like:
 	log_format = short
 
 	[OurPkgVersion]
-	[PodWeaver]
 	[AutoPrereqs]
 
 	[ReportVersions::Tiny]
@@ -118,7 +119,7 @@ a L<Dist::Zilla> configuration approximately like:
 
 =head1 USAGE
 
-Just put C<[@Author::DOHERTY]> in your F<dist.ini>. You can supply the following
+Just put C<[@Author::RUSSOZ]> in your F<dist.ini>. You can supply the following
 options:
 
 =over 4
@@ -134,6 +135,7 @@ release tweet. The tags C<#cpan> and C<#perl> are always added.
 
 =back
 
+=for Pod::Coverage configure
 
 =head1 SEE ALSO
 
