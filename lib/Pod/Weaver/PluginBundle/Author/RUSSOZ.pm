@@ -16,7 +16,10 @@ sub mvp_bundle_config {
     return (
         [ '@Author::RUSSOZ/CorePrep', _exp('@CorePrep'), {} ],
         [ '@Author::RUSSOZ/Name',     _exp('Name'),      {} ],
-        [ '@Author::RUSSOZ/prelude', _exp('Region'), { region_name => 'prelude' } ],
+        [
+            '@Author::RUSSOZ/prelude', _exp('Region'),
+            { region_name => 'prelude' }
+        ],
 
         [ 'SYNOPSIS',    _exp('Generic'), {} ],
         [ 'DESCRIPTION', _exp('Generic'), {} ],
@@ -29,15 +32,29 @@ sub mvp_bundle_config {
 
         [ '@Author::RUSSOZ/Leftovers', _exp('Leftovers'), {} ],
 
-        [ '@Author::RUSSOZ/postlude', _exp('Region'), { region_name => 'postlude' } ],
+        [
+            '@Author::RUSSOZ/postlude', _exp('Region'),
+            { region_name => 'postlude' }
+        ],
 
         [ '@Author::RUSSOZ/Authors', _exp('Authors'), {} ],
         [ '@Author::RUSSOZ/Legal',   _exp('Legal'),   {} ],
 
-        [ '@Author::RUSSOZ/List',     _exp('-Transformer'), { transformer => 'List' } ],
-        [ '@Author::RUSSOZ/Encoding', _exp('-Encoding'),    {} ],
+        [
+            '@Author::RUSSOZ/List', _exp('-Transformer'),
+            { transformer => 'List' }
+        ],
+        [ '@Author::RUSSOZ/Encoding', _exp('-Encoding'), {} ],
     );
 }
 
 1;
+
+__END__
+
+=pod
+
+=for Pod::Coverage mvp_bundle_config
+
+=cut
 
