@@ -71,7 +71,7 @@ sub configure {
     $self->add_bundle(
         'TestingMania' => { disable => q{Test::CPAN::Changes,SynopsisTests}, }
     );
-    $self->add_plugins('MojibakeTest');
+    $self->add_plugins('MojibakeTests');
 
     $self->add_plugins(
         [
