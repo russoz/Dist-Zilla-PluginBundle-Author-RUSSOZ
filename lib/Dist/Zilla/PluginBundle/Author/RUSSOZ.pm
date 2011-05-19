@@ -23,6 +23,13 @@ has twitter => (
     },
 );
 
+has auto_prereqs => (
+    is      => 'ro',
+    isa     => 'Bool',
+    lazy    => 1,
+    default => 1,
+);
+
 has twitter_tags => (
     is      => 'ro',
     isa     => 'Str',
@@ -55,14 +62,16 @@ sub configure {
         ],
 
         'OurPkgVersion',
-        'AutoPrereqs',
 
         'ReportVersions::Tiny',
     );
 
+    $self->add_plugins('AutoPrereqs') if $self->auto_prereqs;
+
     $self->add_bundle(
         'TestingMania' => { disable => q{Test::CPAN::Changes,SynopsisTests}, }
     );
+    $self->add_plugins('MojibakeTest');
 
     $self->add_plugins(
         [
@@ -74,6 +83,7 @@ sub configure {
             }
         ]
     ) if ( $self->twitter );
+
     return;
 }
 
@@ -133,6 +143,11 @@ C<no_twitter> says that releases of this module shouldn't be tweeted.
 
 C<twitter_tags> says which B<additional> hash tags will be used in the
 release tweet. The tags C<#cpan> and C<#perl> are always added.
+
+=item *
+
+C<auto_prereqs> says whether the module will use C<AutoPrereqs> or not.
+Defaults to C<1>.
 
 =back
 
