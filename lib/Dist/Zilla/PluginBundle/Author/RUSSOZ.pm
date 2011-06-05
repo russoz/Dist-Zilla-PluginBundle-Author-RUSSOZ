@@ -64,6 +64,7 @@ sub configure {
         'OurPkgVersion',
 
         'ReportVersions::Tiny',
+        [ 'PodWeaver' => { config_plugin => '@Author::RUSSOZ' }, ]
     );
 
     $self->add_plugins('AutoPrereqs') if $self->auto_prereqs;
@@ -118,10 +119,15 @@ a L<Dist::Zilla> configuration approximately like:
 	log_format = short
 
 	[OurPkgVersion]
-	[AutoPrereqs]
+	[AutoPrereqs]                       ; unless auto_prereqs = 0
 
 	[ReportVersions::Tiny]
+	[PodWeaver]
+	config_plugin = @Author::RUSSOZ
+
+	[MojibakeTests]
 	[@TestingMania]
+	disable = Test::CPAN::Changes, SynopsisTests
 
 	[Twitter]
 	tweet_url = http://search.cpan.org/~{{$AUTHOR_LC}}/{{$DIST}}

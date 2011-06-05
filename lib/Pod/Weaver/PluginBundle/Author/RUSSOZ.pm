@@ -7,46 +7,87 @@ use warnings;
 # VERSION
 
 use Pod::Weaver::Config::Assembler;
+use Pod::Elemental::Transformer::List;
+use Pod::Weaver::Section::SeeAlso;
 
 sub _exp { Pod::Weaver::Config::Assembler->expand_package( $_[0] ) } ## no critic
 
 use namespace::clean;
 
 sub mvp_bundle_config {
-    return (
+    my @plugins;
+    push @plugins, (
         [ '@Author::RUSSOZ/CorePrep', _exp('@CorePrep'), {} ],
+        [ '@Author::RUSSOZ/Encoding', _exp('-Encoding'), {} ],
         [ '@Author::RUSSOZ/Name',     _exp('Name'),      {} ],
+        [ '@Author::RUSSOZ/Version',  _exp('Version'),   {} ],
+
         [
-            '@Author::RUSSOZ/prelude', _exp('Region'),
+            '@Author::RUSSOZ/Prelude', _exp('Region'),
             { region_name => 'prelude' }
         ],
+        [
+            '@Author::RUSSOZ/Synopsis', _exp('Generic'),
+            { header => 'SYNOPSIS' }
+        ],
+        [
+            '@Author::RUSSOZ/Description', _exp('Generic'),
+            { header => 'DESCRIPTION' }
+        ],
+        [
+            '@Author::RUSSOZ/Overview', _exp('Generic'),
+            { header => 'OVERVIEW' }
+        ],
+    );
 
-        [ 'SYNOPSIS',    _exp('Generic'), {} ],
-        [ 'DESCRIPTION', _exp('Generic'), {} ],
-        [ 'OVERVIEW',    _exp('Generic'), {} ],
+    for my $plugin (
+        [ 'Attributes', _exp('Collect'), { command => 'attr' } ],
+        [ 'Methods',    _exp('Collect'), { command => 'method' } ],
+        [ 'Functions',  _exp('Collect'), { command => 'func' } ],
+      )
+    {
+        $plugin->[2]{header} = uc $plugin->[0];
+        push @plugins, $plugin;
+    }
 
-        [ 'ATTRIBUTES', _exp('Collect'), { command => 'attr' } ],
-        [ 'METHODS',    _exp('Collect'), { command => 'method' } ],
-        [ 'FUNCTIONS',  _exp('Collect'), { command => 'func' } ],
-        [ 'TYPES',      _exp('Collect'), { command => 'type' } ],
-
+    push @plugins,
+      (
         [ '@Author::RUSSOZ/Leftovers', _exp('Leftovers'), {} ],
-
+        [ '@Author::RUSSOZ/SeeAlso',   _exp('SeeAlso'),   {} ],
+        [
+            '@Author::RUSSOZ/Support',
+            _exp('Support'),
+            {
+                'websites' => [
+                    'search',   'anno',    'ratings', 'forum',
+                    'kwalitee', 'testers', 'testmatrix'
+                ],
+                'irc'   => [ 'irc.perl.org, #sao-paulo.pm, russoz', ],
+                'email' => 'RUSSOZ',
+            }
+        ],
         [
             '@Author::RUSSOZ/postlude', _exp('Region'),
             { region_name => 'postlude' }
         ],
-
         [ '@Author::RUSSOZ/Authors', _exp('Authors'), {} ],
         [ '@Author::RUSSOZ/Legal',   _exp('Legal'),   {} ],
-
+        [
+            '@Author::RUSSOZ/BugsAndLimitations', _exp('BugsAndLimitations'), {}
+        ],
+        [
+            '@Author::RUSSOZ/WarrantyDisclaimer', _exp('WarrantyDisclaimer'), {}
+        ],
         [
             '@Author::RUSSOZ/List', _exp('-Transformer'),
-            { transformer => 'List' }
+            { 'transformer' => 'List' }
         ],
-        [ '@Author::RUSSOZ/Encoding', _exp('-Encoding'), {} ],
-    );
+      );
+
+    return @plugins;
 }
+
+1;
 
 1;
 
