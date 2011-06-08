@@ -10,6 +10,7 @@ use Moose 0.99;
 use namespace::autoclean 0.09;
 
 use Dist::Zilla 4.102341;    # dzil authordeps
+use Dist::Zilla::PluginBundle::TestingMania 0.012;
 
 with 'Dist::Zilla::Role::PluginBundle::Easy';
 
@@ -72,7 +73,6 @@ sub configure {
     $self->add_bundle(
         'TestingMania' => { disable => q{Test::CPAN::Changes,SynopsisTests}, }
     );
-    $self->add_plugins('MojibakeTests');
 
     $self->add_plugins(
         [
@@ -125,7 +125,6 @@ a L<Dist::Zilla> configuration approximately like:
 	[PodWeaver]
 	config_plugin = @Author::RUSSOZ
 
-	[MojibakeTests]
 	[@TestingMania]
 	disable = Test::CPAN::Changes, SynopsisTests
 
