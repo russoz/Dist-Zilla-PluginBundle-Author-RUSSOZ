@@ -7,6 +7,7 @@ use warnings;
 # VERSION
 
 use Pod::Weaver::Config::Assembler;
+
 use Pod::Elemental::Transformer::List;
 use Pod::Weaver::Section::SeeAlso 1.002;
 use Pod::Weaver::Section::Support 1.003;
@@ -22,8 +23,13 @@ sub mvp_bundle_config {
     push @plugins, (
         [ '@Author::RUSSOZ/CorePrep', _exp('@CorePrep'), {} ],
         [ '@Author::RUSSOZ/Encoding', _exp('-Encoding'), {} ],
-        [ '@Author::RUSSOZ/Name',     _exp('Name'),      {} ],
-        [ '@Author::RUSSOZ/Version',  _exp('Version'),   {} ],
+        [
+            '@Author::RUSSOZ/EnsureUniqueSections',
+            _exp('-EnsureUniqueSections'),
+            {}
+        ],
+        [ '@Author::RUSSOZ/Name',    _exp('Name'),    {} ],
+        [ '@Author::RUSSOZ/Version', _exp('Version'), {} ],
 
         [
             '@Author::RUSSOZ/Prelude', _exp('Region'),
