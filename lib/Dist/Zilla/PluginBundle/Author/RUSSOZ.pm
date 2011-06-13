@@ -11,8 +11,29 @@ use namespace::autoclean 0.09;
 
 use Dist::Zilla 4.102341;    # dzil authordeps
 use Dist::Zilla::PluginBundle::TestingMania 0.012;
+use Dist::Zilla::Plugin::MetaJSON;
+use Dist::Zilla::Plugin::ReadmeFromPod;
+use Dist::Zilla::Plugin::InstallGuide;
+use Dist::Zilla::Plugin::Signature;
 
 with 'Dist::Zilla::Role::PluginBundle::Easy';
+
+has auto_prereqs => (
+    is      => 'ro',
+    isa     => 'Bool',
+    lazy    => 1,
+    default => 1,
+);
+
+has signature => (
+    is      => 'ro',
+    isa     => 'Bool',
+    lazy    => 1,
+    default => sub {
+        ( defined $_[0]->payload->{signature}
+              and $_[0]->payload->{signature} == 1 ) ? 1 : 0;
+    },
+);
 
 has twitter => (
     is      => 'ro',
@@ -22,13 +43,6 @@ has twitter => (
         ( defined $_[0]->payload->{no_twitter}
               and $_[0]->payload->{no_twitter} == 1 ) ? 0 : 1;
     },
-);
-
-has auto_prereqs => (
-    is      => 'ro',
-    isa     => 'Bool',
-    lazy    => 1,
-    default => 1,
 );
 
 has twitter_tags => (
@@ -84,6 +98,8 @@ sub configure {
             }
         ]
     ) if ( $self->twitter );
+
+    $self->add_plugins('Signature') if $self->signature;
 
     return;
 }
