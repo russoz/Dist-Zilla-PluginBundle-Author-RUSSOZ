@@ -35,6 +35,17 @@ has signature => (
     },
 );
 
+has github => (
+    is      => 'ro',
+    isa     => 'Bool',
+    lazy    => 1,
+    default => sub {
+        ( defined $_[0]->payload->{github} and $_[0]->payload->{github} == 0 )
+          ? 0
+          : 1;
+    },
+);
+
 has twitter => (
     is      => 'ro',
     isa     => 'Bool',
@@ -82,6 +93,7 @@ sub configure {
         [ 'PodWeaver' => { config_plugin => '@Author::RUSSOZ' }, ]
     );
 
+    $self->add_plugins('GithubMeta')  if $self->github;
     $self->add_plugins('AutoPrereqs') if $self->auto_prereqs;
 
     $self->add_bundle(
