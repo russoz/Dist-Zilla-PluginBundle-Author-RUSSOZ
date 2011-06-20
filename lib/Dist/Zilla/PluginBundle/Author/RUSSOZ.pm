@@ -99,6 +99,7 @@ sub configure {
     $self->add_bundle(
         'TestingMania' => { disable => q{Test::CPAN::Changes,SynopsisTests}, }
     );
+    $self->add_plugins( 'Test::Pod::No404s' );
 
     $self->add_plugins(
         [
