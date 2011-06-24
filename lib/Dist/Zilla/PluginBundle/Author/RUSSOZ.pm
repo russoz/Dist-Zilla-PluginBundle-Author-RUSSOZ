@@ -25,23 +25,14 @@ has auto_prereqs => (
     default => 1,
 );
 
-has signature => (
-    is      => 'ro',
-    isa     => 'Bool',
-    lazy    => 1,
-    default => sub {
-        ( defined $_[0]->payload->{signature}
-              and $_[0]->payload->{signature} == 1 ) ? 1 : 0;
-    },
-);
-
 has no404 => (
     is      => 'ro',
     isa     => 'Bool',
     lazy    => 1,
     default => sub {
-        ( defined $_[0]->payload->{no404}
-              and $_[0]->payload->{no404} == 1 ) ? 1 : 0;
+        ( defined $_[0]->payload->{no404} and $_[0]->payload->{no404} == 1 )
+          ? 1
+          : 0;
     },
 );
 
@@ -79,6 +70,26 @@ has twitter_tags => (
     },
 );
 
+has task_weaver => (
+    is      => 'ro',
+    isa     => 'Bool',
+    lazy    => 1,
+    default => sub {
+        ( defined $_[0]->payload->{task_weaver}
+              and $_[0]->payload->{task_weaver} == 1 ) ? 1 : 0;
+    },
+);
+
+has signature => (
+    is      => 'ro',
+    isa     => 'Bool',
+    lazy    => 1,
+    default => sub {
+        ( defined $_[0]->payload->{signature}
+              and $_[0]->payload->{signature} == 0 ) ? 0 : 1;
+    },
+);
+
 sub configure {
     my $self = shift;
 
@@ -98,18 +109,24 @@ sub configure {
         ],
 
         'OurPkgVersion',
-
-        'ReportVersions::Tiny',
-        [ 'PodWeaver' => { config_plugin => '@Author::RUSSOZ' }, ]
     );
 
     $self->add_plugins('GithubMeta')  if $self->github;
     $self->add_plugins('AutoPrereqs') if $self->auto_prereqs;
 
-    $self->add_bundle(
-        'TestingMania' => { disable => q{Test::CPAN::Changes,SynopsisTests}, }
-    );
-    $self->add_plugins( 'Test::Pod::No404s' ) if ($self->no404 || $ENV{NO404});
+    if ( $self->task_weaver ) {
+        $self->add_plugins('TaskWeaver');
+    }
+    else {
+        $self->add_plugins( 'ReportVersions::Tiny',
+            [ 'PodWeaver' => { config_plugin => '@Author::RUSSOZ' }, ],
+        );
+
+        $self->add_bundle( 'TestingMania' =>
+              { disable => q{Test::CPAN::Changes,SynopsisTests}, } );
+        $self->add_plugins('Test::Pod::No404s')
+          if ( $self->no404 || $ENV{NO404} );
+    }
 
     $self->add_plugins(
         [
@@ -140,6 +157,13 @@ __END__
 
 	# in dist.ini
 	[@Author::RUSSOZ]
+	; auto_prereqs = 1
+	; github = 1
+	; no404 = 0
+	; task_weaver = 0
+	; no_twitter = 0
+	; twitter_tags = <empty>
+	; signature = 1
 
 =head1 DESCRIPTION
 
@@ -158,42 +182,52 @@ a L<Dist::Zilla> configuration approximately like:
 	log_format = short
 
 	[OurPkgVersion]
+	[GithubMeta]                        ; if github = 1
 	[AutoPrereqs]                       ; unless auto_prereqs = 0
 
 	[ReportVersions::Tiny]
 	[PodWeaver]
 	config_plugin = @Author::RUSSOZ
 
+	; if task_weaver =1
+	[TaskWeaver]
+
+	; else (task_weaver = 0)
 	[@TestingMania]
 	disable = Test::CPAN::Changes, SynopsisTests
+	[Test::Pod::No404]
+
+	; endif
 
 	[Twitter]
 	tweet_url = http://search.cpan.org/~{{$AUTHOR_LC}}/{{$DIST}}
-	hash_tags = #perl #cpan
+	hash_tags = #perl #cpan             ; plus tags in twitter_tags
 	url_shortener = TinyURL
+
+	[Signature]                         ; if signature = 1
 
 =head1 USAGE
 
 Just put C<[@Author::RUSSOZ]> in your F<dist.ini>. You can supply the following
 options:
 
-=over 4
-
-=item *
-
-C<no_twitter> says that releases of this module shouldn't be tweeted.
-
-=item *
-
-C<twitter_tags> says which B<additional> hash tags will be used in the
-release tweet. The tags C<#cpan> and C<#perl> are always added.
-
-=item *
-
-C<auto_prereqs> says whether the module will use C<AutoPrereqs> or not.
-Defaults to C<1>.
-
-=back
+=for :list
+* auto_prereqs
+Whether the module will use C<AutoPrereqs> or not. Default = 1.
+* github
+If using github, enable C<[GithubMeta]>. Default = 1.
+* no404
+Whether to use C<[Test::Pod::No404]> in the distribution. Default = 0.
+* no_twitter
+Releases of this module shouldn't be tweeted. Default = 0.
+* twitter_tags
+Additional hash tags to be used in the release tweet.
+The tags C<#cpan> and C<#perl> are always prepended.
+* signature
+Whether to GPG sign the module or not. Default = 1.
+* task_weaver
+Set to 1 if this is a C<Task::> distribution. It will enable C<[TaskWeaver]>
+while disabling C<[PodWeaver]> and all release tests. Default = 0.
 
 =for Pod::Coverage configure
 
