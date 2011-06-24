@@ -35,6 +35,16 @@ has signature => (
     },
 );
 
+has no404 => (
+    is      => 'ro',
+    isa     => 'Bool',
+    lazy    => 1,
+    default => sub {
+        ( defined $_[0]->payload->{no404}
+              and $_[0]->payload->{no404} == 1 ) ? 1 : 0;
+    },
+);
+
 has github => (
     is      => 'ro',
     isa     => 'Bool',
@@ -99,7 +109,7 @@ sub configure {
     $self->add_bundle(
         'TestingMania' => { disable => q{Test::CPAN::Changes,SynopsisTests}, }
     );
-    $self->add_plugins( 'Test::Pod::No404s' );
+    $self->add_plugins( 'Test::Pod::No404s' ) if ($self->no404 || $ENV{NO404});
 
     $self->add_plugins(
         [
