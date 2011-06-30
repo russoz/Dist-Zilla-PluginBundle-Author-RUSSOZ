@@ -122,6 +122,7 @@ sub configure {
             [ 'PodWeaver' => { config_plugin => '@Author::RUSSOZ' }, ],
         );
 
+        $self->add_plugins('Test::UseAllModules');
         $self->add_bundle( 'TestingMania' =>
               { disable => q{Test::CPAN::Changes,SynopsisTests}, } );
         $self->add_plugins('Test::Pod::No404s')
