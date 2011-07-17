@@ -25,14 +25,13 @@ has auto_prereqs => (
     default => 1,
 );
 
-has no404 => (
+has use_no404 => (
     is      => 'ro',
     isa     => 'Bool',
     lazy    => 1,
     default => sub {
-        ( defined $_[0]->payload->{no404} and $_[0]->payload->{no404} == 1 )
-          ? 1
-          : 0;
+        ( defined $_[0]->payload->{use_no404}
+              and $_[0]->payload->{use_no404} == 1 ) ? 1 : 0;
     },
 );
 
@@ -126,7 +125,7 @@ sub configure {
         $self->add_bundle( 'TestingMania' =>
               { disable => q{Test::CPAN::Changes,SynopsisTests}, } );
         $self->add_plugins('Test::Pod::No404s')
-          if ( $self->no404 || $ENV{NO404} );
+          if ( $self->use_no404 || $ENV{NO404} );
     }
 
     $self->add_plugins(
@@ -160,7 +159,7 @@ __END__
 	[@Author::RUSSOZ]
 	; auto_prereqs = 1
 	; github = 1
-	; no404 = 0
+	; use_no404 = 0
 	; task_weaver = 0
 	; no_twitter = 0
 	; twitter_tags = <empty>
@@ -217,7 +216,7 @@ options:
 Whether the module will use C<AutoPrereqs> or not. Default = 1.
 * github
 If using github, enable C<[GithubMeta]>. Default = 1.
-* no404
+* use_no404
 Whether to use C<[Test::Pod::No404]> in the distribution. Default = 0.
 * no_twitter
 Releases of this module shouldn't be tweeted. Default = 0.
