@@ -8,6 +8,7 @@ use warnings;
 
 use Moose 0.99;
 use namespace::autoclean 0.09;
+use version;
 
 use Dist::Zilla 4.102341;    # dzil authordeps
 use Dist::Zilla::PluginBundle::TestingMania 0.012;
@@ -17,6 +18,49 @@ use Dist::Zilla::Plugin::InstallGuide;
 use Dist::Zilla::Plugin::Signature;
 
 with 'Dist::Zilla::Role::PluginBundle::Easy';
+
+has fake => (
+    is      => 'ro',
+    isa     => 'Bool',
+    lazy    => 1,
+    default => sub {
+        return 1 if exists $ENV{FAKE};
+        ( defined $_[0]->payload->{fake} and $_[0]->payload->{fake} == 1 )
+          ? 1
+          : 0;
+    },
+);
+
+has version => (
+    is      => 'ro',
+    isa     => 'Str',
+    lazy    => 1,
+    default => sub { return ( $_[0]->payload->{version} or 'none' ) },
+);
+
+has _version_types => (
+    is      => 'ro',
+    isa     => 'HashRef[CodeRef]',
+    lazy    => 1,
+    builder => '_build_version_types',
+);
+
+sub _build_version_types {
+    my $self = shift;
+    return {
+        'none'    => sub { },
+        'auto'    => sub { $self->add_plugins('AutoVersion') },
+        'gitnext' => sub { $self->add_plugins('Git::NextVersion') },
+    };
+}
+
+sub _add_version {
+    my $self = shift;
+    my $spec = $self->version;
+    return unless exists $self->_version_types->{$spec};
+    $self->_version_types->{$spec}->();
+    return;
+}
 
 has auto_prereqs => (
     is      => 'ro',
@@ -35,11 +79,23 @@ has use_no404 => (
     },
 );
 
+has git => (
+    is      => 'ro',
+    isa     => 'Bool',
+    lazy    => 1,
+    default => sub {
+        ( defined $_[0]->payload->{git} and $_[0]->payload->{git} == 0 )
+          ? 0
+          : 1;
+    },
+);
+
 has github => (
     is      => 'ro',
     isa     => 'Bool',
     lazy    => 1,
     default => sub {
+        return 0 unless $_[0]->git;
         ( defined $_[0]->payload->{github} and $_[0]->payload->{github} == 0 )
           ? 0
           : 1;
@@ -61,11 +117,8 @@ has twitter_tags => (
     isa     => 'Str',
     lazy    => 1,
     default => sub {
-        my @t =
-          defined( $_[0]->payload->{twitter_tags} )
-          ? ( $_[0]->payload->{twitter_tags} )
-          : ();
-        return join( ' ', q{#cpan}, q{#perl}, @t );
+        my $t = $_[0]->payload->{twitter_tags} || '';
+        return join( ' ', q{#cpan}, q{#perl}, $t );
     },
 );
 
@@ -92,12 +145,23 @@ has signature => (
 sub configure {
     my $self = shift;
 
-    $self->add_bundle('Basic');
+    # Basic sans upload
+    $self->add_plugins(
+        'GatherDir', 'PruneCruft', 'ManifestSkip', 'MetaYAML',
+        'License',   'ExtraTests', 'ExecDir',      'ShareDir',
+        'MakeMaker', 'Manifest',   'TestRelease',  'ConfirmRelease',
+    );
+    $self->fake
+      ? $self->add_plugins('FakeRelease')
+      : $self->add_plugins('UploadToCPAN');
+
+    $self->_add_version();
 
     $self->add_plugins(
         'MetaJSON',
         'ReadmeFromPod',
         'InstallGuide',
+        'OurPkgVersion',
         [
             'GitFmtChanges' => {
                 max_age    => 365,
@@ -106,8 +170,6 @@ sub configure {
                 log_format => q{short},
             }
         ],
-
-        'OurPkgVersion',
     );
 
     $self->add_plugins('GithubMeta')  if $self->github;
@@ -137,9 +199,10 @@ sub configure {
                 url_shortener => 'TinyURL',
             }
         ]
-    ) if ( $self->twitter );
+    ) if ( $self->twitter and not $self->fake );
 
     $self->add_plugins('Signature') if $self->signature;
+    $self->add_bundle('Git')        if $self->git;
 
     return;
 }
@@ -157,6 +220,8 @@ __END__
 
 	# in dist.ini
 	[@Author::RUSSOZ]
+	; fake = 0
+	; version = none | auto | gitnext
 	; auto_prereqs = 1
 	; github = 1
 	; use_no404 = 0
@@ -195,7 +260,7 @@ a L<Dist::Zilla> configuration approximately like:
 	; else (task_weaver = 0)
 	[@TestingMania]
 	disable = Test::CPAN::Changes, SynopsisTests
-	[Test::Pod::No404]
+	; [Test::Pod::No404]
 
 	; endif
 
@@ -205,6 +270,7 @@ a L<Dist::Zilla> configuration approximately like:
 	url_shortener = TinyURL
 
 	[Signature]                         ; if signature = 1
+	[@Git]
 
 =head1 USAGE
 
@@ -212,6 +278,11 @@ Just put C<[@Author::RUSSOZ]> in your F<dist.ini>. You can supply the following
 options:
 
 =for :list
+* version
+How to handle version numbering. Possible values: none,
+auto (will use L<Dist::Zilla::Plugin::AutoVersion>),
+gitnext (will use Dist::Zilla::Plugin::Git::NextVersion).
+Default = none.
 * auto_prereqs
 Whether the module will use C<AutoPrereqs> or not. Default = 1.
 * github
@@ -228,12 +299,16 @@ Whether to GPG sign the module or not. Default = 1.
 * task_weaver
 Set to 1 if this is a C<Task::> distribution. It will enable C<[TaskWeaver]>
 while disabling C<[PodWeaver]> and all release tests. Default = 0.
+* fake
+Set to 1 if this is a fake release. It will disable [UploadToCPAN] and
+enable [FakeRelease]. It can also be enabled by setting the environemnt
+variable C<FAKE>. Default = 0.
 
 =for Pod::Coverage configure
 
 =head1 SEE ALSO
 
-C<L<Dist::Zilla>>
+C<< L<Dist::Zilla> >>
 
 =head1 ACKNOWLEDGMENTS
 
