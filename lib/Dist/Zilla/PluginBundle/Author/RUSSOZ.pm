@@ -51,6 +51,7 @@ sub _build_version_types {
         'none'    => sub { },
         'auto'    => sub { $self->add_plugins('AutoVersion') },
         'gitnext' => sub { $self->add_plugins('Git::NextVersion') },
+        'module'  => sub { $self->add_plugins('VersionFromModule') },
     };
 }
 
@@ -157,11 +158,11 @@ sub configure {
 
     $self->_add_version();
 
+    $self->add_plugins('OurPkgVersion') unless $self->version eq 'module';
     $self->add_plugins(
         'MetaJSON',
         'ReadmeFromPod',
         'InstallGuide',
-        'OurPkgVersion',
         [
             'GitFmtChanges' => {
                 max_age    => 365,
