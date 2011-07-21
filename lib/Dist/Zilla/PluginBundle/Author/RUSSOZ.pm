@@ -15,6 +15,7 @@ use Dist::Zilla::PluginBundle::TestingMania 0.012;
 use Dist::Zilla::Plugin::MetaJSON;
 use Dist::Zilla::Plugin::ReadmeFromPod;
 use Dist::Zilla::Plugin::InstallGuide;
+use Dist::Zilla::Plugin::PerlTidy 0.11;
 use Dist::Zilla::Plugin::Signature;
 
 with 'Dist::Zilla::Role::PluginBundle::Easy';
@@ -163,6 +164,7 @@ sub configure {
         'MetaJSON',
         'ReadmeFromPod',
         'InstallGuide',
+        'PerlTidy',
         [
             'GitFmtChanges' => {
                 max_age    => 365,
