@@ -10,14 +10,6 @@ use Moose 0.99;
 use namespace::autoclean 0.09;
 use version;
 
-use Dist::Zilla 4.102341;    # dzil authordeps
-use Dist::Zilla::PluginBundle::TestingMania 0.012;
-use Dist::Zilla::Plugin::MetaJSON;
-use Dist::Zilla::Plugin::ReadmeFromPod;
-use Dist::Zilla::Plugin::InstallGuide;
-use Dist::Zilla::Plugin::PerlTidy 0.11;
-use Dist::Zilla::Plugin::Signature;
-
 with 'Dist::Zilla::Role::PluginBundle::Easy';
 
 has fake => (
@@ -188,7 +180,7 @@ sub configure {
 
         $self->add_plugins('Test::UseAllModules');
         $self->add_bundle( 'TestingMania' =>
-              { disable => q{Test::CPAN::Changes,SynopsisTests}, } );
+              { disable => q{Test::CPAN::Changes,Test::Synopsis}, } );
         $self->add_plugins('Test::Pod::No404s')
           if ( $self->use_no404 || $ENV{NO404} );
     }
