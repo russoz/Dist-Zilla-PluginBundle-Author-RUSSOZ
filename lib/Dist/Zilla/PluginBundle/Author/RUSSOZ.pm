@@ -101,8 +101,8 @@ has twitter => (
     isa     => 'Bool',
     lazy    => 1,
     default => sub {
-        ( defined $_[0]->payload->{no_twitter}
-              and $_[0]->payload->{no_twitter} == 1 ) ? 0 : 1;
+        ( defined $_[0]->payload->{twitter}
+              and $_[0]->payload->{twitter} == 1 ) ? 1 : 0;
     },
 );
 
@@ -221,7 +221,7 @@ __END__
 	; github = 1
 	; use_no404 = 0
 	; task_weaver = 0
-	; no_twitter = 0
+	; twitter = 0
 	; twitter_tags = <empty>
 	; signature = 1
 
@@ -284,8 +284,9 @@ Whether the module will use C<AutoPrereqs> or not. Default = 1.
 If using github, enable C<[GithubMeta]>. Default = 1.
 * use_no404
 Whether to use C<[Test::Pod::No404]> in the distribution. Default = 0.
-* no_twitter
-Releases of this module shouldn't be tweeted. Default = 0.
+* twitter
+Releases of this module should be tweeted. Actually this is not working properly
+since twitter.com moved to mandatory OAuth authetication. Default = 0.
 * twitter_tags
 Additional hash tags to be used in the release tweet.
 The tags C<#cpan> and C<#perl> are always prepended.
