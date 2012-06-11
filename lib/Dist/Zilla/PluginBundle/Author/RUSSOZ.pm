@@ -96,26 +96,6 @@ has github => (
     },
 );
 
-has twitter => (
-    is      => 'ro',
-    isa     => 'Bool',
-    lazy    => 1,
-    default => sub {
-        ( defined $_[0]->payload->{twitter}
-              and $_[0]->payload->{twitter} == 1 ) ? 1 : 0;
-    },
-);
-
-has twitter_tags => (
-    is      => 'ro',
-    isa     => 'Str',
-    lazy    => 1,
-    default => sub {
-        my $t = $_[0]->payload->{twitter_tags} || '';
-        return join( ' ', q{#cpan}, q{#perl}, $t );
-    },
-);
-
 has task_weaver => (
     is      => 'ro',
     isa     => 'Bool',
@@ -185,17 +165,6 @@ sub configure {
           if ( $self->use_no404 || $ENV{NO404} );
     }
 
-    $self->add_plugins(
-        [
-            'Twitter' => {
-                hash_tags => $self->twitter_tags,
-                tweet_url =>
-                  q(http://search.cpan.org/~{{$AUTHOR_LC}}/{{$DIST}}),
-                url_shortener => 'TinyURL',
-            }
-        ]
-    ) if ( $self->twitter and not $self->fake );
-
     $self->add_plugins('Signature') if $self->signature;
     $self->add_bundle('Git')        if $self->git;
 
@@ -221,8 +190,6 @@ __END__
 	; github = 1
 	; use_no404 = 0
 	; task_weaver = 0
-	; twitter = 0
-	; twitter_tags = <empty>
 	; signature = 1
 
 =head1 DESCRIPTION
@@ -259,11 +226,6 @@ a L<Dist::Zilla> configuration approximately like:
 
 	; endif
 
-	[Twitter]
-	tweet_url = http://search.cpan.org/~{{$AUTHOR_LC}}/{{$DIST}}
-	hash_tags = #perl #cpan             ; plus tags in twitter_tags
-	url_shortener = TinyURL
-
 	[Signature]                         ; if signature = 1
 	[@Git]
 
@@ -284,12 +246,6 @@ Whether the module will use C<AutoPrereqs> or not. Default = 1.
 If using github, enable C<[GithubMeta]>. Default = 1.
 * use_no404
 Whether to use C<[Test::Pod::No404]> in the distribution. Default = 0.
-* twitter
-Releases of this module should be tweeted. Actually this is not working properly
-since twitter.com moved to mandatory OAuth authetication. Default = 0.
-* twitter_tags
-Additional hash tags to be used in the release tweet.
-The tags C<#cpan> and C<#perl> are always prepended.
 * signature
 Whether to GPG sign the module or not. Default = 1.
 * task_weaver
@@ -309,7 +265,7 @@ C<< L<Dist::Zilla> >>
 =head1 ACKNOWLEDGMENTS
 
 Much of the first implementation was shamelessly copied from
-L<Dist::Zilla::PluginBundle::Author::DOHERTY>.
+C<Dist::Zilla::PluginBundle::Author::DOHERTY>.
 
 =cut
 
