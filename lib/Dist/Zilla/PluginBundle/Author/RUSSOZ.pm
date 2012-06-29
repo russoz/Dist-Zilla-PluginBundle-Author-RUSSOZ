@@ -160,7 +160,7 @@ sub configure {
 
         $self->add_plugins('Test::UseAllModules');
         $self->add_bundle( 'TestingMania' =>
-              { disable => q{Test::CPAN::Changes,Test::Synopsis}, } );
+              { disable => [ 'Test::CPAN::Changes', 'Test::Synopsis' ], } );
         $self->add_plugins('Test::Pod::No404s')
           if ( $self->use_no404 || $ENV{NO404} );
     }
