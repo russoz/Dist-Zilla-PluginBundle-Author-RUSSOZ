@@ -116,6 +116,17 @@ has signature => (
     },
 );
 
+has report => (
+    is      => 'ro',
+    isa     => 'Bool',
+    lazy    => 1,
+    default => sub {
+        ( defined $_[0]->payload->{report}
+              and $_[0]->payload->{report} == 1 ) ? 1 : 0;
+    },
+);
+
+
 sub configure {
     my $self = shift;
 
@@ -166,6 +177,7 @@ sub configure {
     }
 
     $self->add_plugins('Signature') if $self->signature;
+    $self->add_plugins('ReportPhase') if $self->report;
     $self->add_bundle('Git')        if $self->git;
 
     return;
@@ -191,6 +203,7 @@ __END__
 	; use_no404 = 0
 	; task_weaver = 0
 	; signature = 1
+	; report = 0
 
 =head1 DESCRIPTION
 
@@ -227,6 +240,7 @@ a L<Dist::Zilla> configuration approximately like:
 	; endif
 
 	[Signature]                         ; if signature = 1
+	[ReportPhase]                       ; if report = 1
 	[@Git]
 
 =head1 USAGE
@@ -246,8 +260,6 @@ Whether the module will use C<AutoPrereqs> or not. Default = 1.
 If using github, enable C<[GithubMeta]>. Default = 1.
 * use_no404
 Whether to use C<[Test::Pod::No404]> in the distribution. Default = 0.
-* signature
-Whether to GPG sign the module or not. Default = 1.
 * task_weaver
 Set to 1 if this is a C<Task::> distribution. It will enable C<[TaskWeaver]>
 while disabling C<[PodWeaver]> and all release tests. Default = 0.
@@ -255,6 +267,10 @@ while disabling C<[PodWeaver]> and all release tests. Default = 0.
 Set to 1 if this is a fake release. It will disable [UploadToCPAN] and
 enable [FakeRelease]. It can also be enabled by setting the environemnt
 variable C<FAKE>. Default = 0.
+* signature
+Whether to GPG sign the module or not. Default = 1.
+* report
+Whether to report the Dist::Zilla building phases. Default = 0.
 
 =for Pod::Coverage configure
 
