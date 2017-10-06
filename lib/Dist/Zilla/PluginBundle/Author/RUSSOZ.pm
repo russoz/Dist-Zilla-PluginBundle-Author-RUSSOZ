@@ -44,7 +44,7 @@ sub _build_version_types {
         'none'    => sub { },
         'auto'    => sub { $self->add_plugins('AutoVersion') },
         'gitnext' => sub { $self->add_plugins('Git::NextVersion') },
-        'module'  => sub { $self->add_plugins('VersionFromModule') },
+        'module'  => sub { $self->add_plugins('VersionFromMainModule') },
     };
 }
 
@@ -121,11 +121,11 @@ has report => (
     isa     => 'Bool',
     lazy    => 1,
     default => sub {
-        ( defined $_[0]->payload->{report}
-              and $_[0]->payload->{report} == 1 ) ? 1 : 0;
+        ( defined $_[0]->payload->{report} and $_[0]->payload->{report} == 1 )
+          ? 1
+          : 0;
     },
 );
-
 
 sub configure {
     my $self = shift;
@@ -133,7 +133,7 @@ sub configure {
     # Basic sans upload
     $self->add_plugins(
         'GatherDir', 'PruneCruft', 'ManifestSkip', 'MetaYAML',
-        'License',   'ExtraTests', 'ExecDir',      'ShareDir',
+        'License',   'ExecDir',      'ShareDir',
         'MakeMaker', 'Manifest',   'TestRelease',  'ConfirmRelease',
     );
     $self->fake
@@ -171,14 +171,18 @@ sub configure {
 
         $self->add_plugins('Test::UseAllModules');
         $self->add_bundle( 'TestingMania' =>
-              { disable => [ 'Test::CPAN::Changes', 'Test::Synopsis' ], } );
+              { disable => [
+                      'Test::CPAN::Changes',
+                      'Test::Synopsis',
+                  ],
+              } );
         $self->add_plugins('Test::Pod::No404s')
           if ( $self->use_no404 || $ENV{NO404} );
     }
 
-    $self->add_plugins('Signature') if $self->signature;
+    $self->add_plugins('Signature')   if $self->signature;
     $self->add_plugins('ReportPhase') if $self->report;
-    $self->add_bundle('Git')        if $self->git;
+    $self->add_bundle('Git')          if $self->git;
 
     return;
 }

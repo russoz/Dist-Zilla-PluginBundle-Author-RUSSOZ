@@ -14,7 +14,7 @@ use Pod::Weaver::Section::Support 1.003;
 use Pod::Weaver::Section::WarrantyDisclaimer 0.103511;
 use Pod::Weaver::Plugin::Encoding 0.01;
 
-sub _exp {     ## no critic
+sub _exp {    ## no critic
     Pod::Weaver::Config::Assembler->expand_package( $_[0] );
 }
 
