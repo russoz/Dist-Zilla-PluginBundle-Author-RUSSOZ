@@ -96,6 +96,18 @@ has github => (
     },
 );
 
+has github_issues => (
+    is => 'ro',
+        isa => 'Bool',
+        lazy => 1,
+        default => sub {
+        return 0 unless $_[0]->github;
+        ( defined $_[0]->payload->{github_issues} and $_[0]->payload->{github_issues} == 0 )
+          ? 0
+          : 1;
+        },
+);
+
 has task_weaver => (
     is      => 'ro',
     isa     => 'Bool',
@@ -158,7 +170,11 @@ sub configure {
         ],
     );
 
-    $self->add_plugins('GithubMeta')  if $self->github;
+    $self->add_plugins([
+        'GithubMeta' => {
+            issues => $self->github_issues,
+        }
+    ])  if $self->github;
     $self->add_plugins('AutoPrereqs') if $self->auto_prereqs;
 
     if ( $self->task_weaver ) {
@@ -179,6 +195,8 @@ sub configure {
     $self->add_plugins('Signature')   if $self->signature;
     $self->add_plugins('ReportPhase') if $self->report;
     $self->add_bundle('Git')          if $self->git;
+
+    $self->add_plugins('Git::Contributors');
 
     $self->add_plugins('ExtraTests');
 

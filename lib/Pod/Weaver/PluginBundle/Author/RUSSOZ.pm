@@ -81,8 +81,9 @@ sub mvp_bundle_config {
             '@Author::RUSSOZ/postlude', _exp('Region'),
             { region_name => 'postlude' }
         ],
-        [ '@Author::RUSSOZ/Authors', _exp('Authors'), {} ],
-        [ '@Author::RUSSOZ/Legal',   _exp('Legal'),   {} ],
+        [ '@Author::RUSSOZ/Authors',      _exp('Authors'),      {} ],
+        [ '@Author::RUSSOZ/Contributors', _exp('Contributors'), {} ],
+        [ '@Author::RUSSOZ/Legal',        _exp('Legal'),        {} ],
         [
             '@Author::RUSSOZ/BugsAndLimitations', _exp('BugsAndLimitations'), {}
         ],
