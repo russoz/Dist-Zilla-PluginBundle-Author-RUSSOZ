@@ -96,18 +96,6 @@ has github => (
     },
 );
 
-has github_issues => (
-    is => 'ro',
-        isa => 'Bool',
-        lazy => 1,
-        default => sub {
-        return 0 unless $_[0]->github;
-        ( defined $_[0]->payload->{github_issues} and $_[0]->payload->{github_issues} == 0 )
-          ? 0
-          : 1;
-        },
-);
-
 has task_weaver => (
     is      => 'ro',
     isa     => 'Bool',
@@ -170,18 +158,14 @@ sub configure {
         ],
     );
 
-    $self->add_plugins([
-        'GithubMeta' => {
-            issues => $self->github_issues,
-        }
-    ])  if $self->github;
+    $self->add_plugins('GithubMeta')  if $self->github;
     $self->add_plugins('AutoPrereqs') if $self->auto_prereqs;
 
     if ( $self->task_weaver ) {
         $self->add_plugins('TaskWeaver');
     }
     else {
-        $self->add_plugins( 'ReportVersions::Tiny',
+        $self->add_plugins( 'Test::ReportPrereqs',
             [ 'PodWeaver' => { config_plugin => '@Author::RUSSOZ' }, ],
         );
 
