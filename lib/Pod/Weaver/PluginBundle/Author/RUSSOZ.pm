@@ -12,7 +12,6 @@ use Pod::Elemental::Transformer::List;
 use Pod::Weaver::Section::SeeAlso 1.002;
 use Pod::Weaver::Section::Support 1.003;
 use Pod::Weaver::Section::WarrantyDisclaimer 0.103511;
-use Pod::Weaver::Plugin::Encoding 0.01;
 
 sub _exp {    ## no critic
     Pod::Weaver::Config::Assembler->expand_package( $_[0] );
@@ -23,8 +22,8 @@ use namespace::clean;
 sub mvp_bundle_config {
     my @plugins;
     push @plugins, (
-        [ '@Author::RUSSOZ/CorePrep', _exp('@CorePrep'), {} ],
-        [ '@Author::RUSSOZ/Encoding', _exp('-Encoding'), {} ],
+        [ '@Author::RUSSOZ/CorePrep', _exp('@CorePrep'),       {} ],
+        [ '@Author::RUSSOZ/Encoding', _exp('-SingleEncoding'), {} ],
         [
             '@Author::RUSSOZ/EnsureUniqueSections',
             _exp('-EnsureUniqueSections'),
